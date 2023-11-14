@@ -267,9 +267,13 @@ export class HTTPSocket extends EventEmitter {
           chunk = chunk.toString(encoding)
         }
 
-        this.emit('data', chunk)
+        // NOTE: for some reason uws will ocassionally send empty chunks at the start
+        // of a request, this is a workaround for that
+        if (this.bytesRead) {
+          this.emit('data', chunk)
+          cb(null, chunk)
+        }
 
-        cb(null, chunk)
         if (isLast) {
           done = true
           cb(null, null)
