@@ -3,7 +3,7 @@
 
 
 
-var _chunkNGE5WKMJcjs = require('./chunk-NGE5WKMJ.cjs');
+var _chunkZ6BJNS4Zcjs = require('./chunk-Z6BJNS4Z.cjs');
 
 // src/plugin.js
 var _fastifyplugin = require('fastify-plugin'); var _fastifyplugin2 = _interopRequireDefault(_fastifyplugin);
@@ -17,7 +17,7 @@ function fastifyUws(fastify, opts, next) {
   if (errorHandler && typeof errorHandler !== "function") {
     return next(new Error("invalid errorHandler function"));
   }
-  const websocketServer = server[_chunkNGE5WKMJcjs.kWs] = new (0, _chunkNGE5WKMJcjs.WebSocketServer)(options);
+  const websocketServer = server[_chunkZ6BJNS4Zcjs.kWs] = new (0, _chunkZ6BJNS4Zcjs.WebSocketServer)(options);
   fastify.decorate("websocketServer", websocketServer);
   fastify.addHook("onRoute", (routeOptions) => {
     const isWebSocket = !!routeOptions.uws || routeOptions.uwsHandler;
@@ -35,7 +35,7 @@ function fastifyUws(fastify, opts, next) {
     const topics = {};
     if (wsOptions.topics) {
       wsOptions.topics.forEach((topic) => {
-        topics[topic] = _chunkNGE5WKMJcjs.WebSocket.allocTopic(namespace, topic);
+        topics[topic] = _chunkZ6BJNS4Zcjs.WebSocket.allocTopic(namespace, topic);
       });
     }
     routeOptions.handler = function(request, reply) {
@@ -44,10 +44,10 @@ function fastifyUws(fastify, opts, next) {
         /** @type {unknown} */
         request.raw
       );
-      if (requestRaw[_chunkNGE5WKMJcjs.kWs]) {
+      if (requestRaw[_chunkZ6BJNS4Zcjs.kWs]) {
         reply.hijack();
-        const uRes = requestRaw.socket[_chunkNGE5WKMJcjs.kRes];
-        requestRaw.socket[_chunkNGE5WKMJcjs.kWs] = true;
+        const uRes = requestRaw.socket[_chunkZ6BJNS4Zcjs.kRes];
+        requestRaw.socket[_chunkZ6BJNS4Zcjs.kWs] = true;
         if (requestRaw.socket.aborted || requestRaw.socket.destroyed)
           return;
         uRes.upgrade(
@@ -55,7 +55,7 @@ function fastifyUws(fastify, opts, next) {
             req: requestRaw,
             handler: (ws) => {
               request.uws = true;
-              const conn = new (0, _chunkNGE5WKMJcjs.WebSocket)(namespace, ws, topics);
+              const conn = new (0, _chunkZ6BJNS4Zcjs.WebSocket)(namespace, ws, topics);
               let result;
               try {
                 request.log.info("fastify-uws: websocket connection opened");
@@ -80,7 +80,7 @@ function fastifyUws(fastify, opts, next) {
           requestRaw.headers["sec-websocket-key"],
           requestRaw.headers["sec-websocket-protocol"],
           requestRaw.headers["sec-websocket-extensions"],
-          requestRaw[_chunkNGE5WKMJcjs.kWs]
+          requestRaw[_chunkZ6BJNS4Zcjs.kWs]
         );
       } else {
         return httpHandler.call(this, request, reply);
