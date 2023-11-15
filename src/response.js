@@ -63,7 +63,7 @@ export class Response extends Writable {
     return this.socket.writableEnded && !this.socket.aborted
   }
 
-  get status () {
+  get statusCodeWithMessage () {
     return `${this.statusCode} ${this.statusMessage || STATUS_CODES[this.statusCode]}`
   }
 
@@ -141,6 +141,26 @@ export class Response extends Writable {
     this.socket.destroy(err)
   }
 
+  // nestjs requires .status and .send to exist.
+  // i'm not sure if this is supposed to match fastify's reply api
+  // (ie if the problem is here, or in nest's code, or somewhere else)
+  // but this gets things to work for now (https://fastify.dev/docs/latest/Reference/Reply/#senddata)
+  // https://github.com/nestjs/nest/blob/d0850d2062373b3c15a4c8e2cf0fe6e546d7593e/packages/platform-fastify/adapters/fastify-adapter.ts#L361
+  // fastify.Reply doesn't even have status (uses code) so i'm not sure what's going on there
+  status (code) {
+    this.statusCode = code
+    return this
+  }
+
+  // see comment above status()
+  send (data) {
+    if (typeof data !== 'string') {
+      data = JSON.stringify(data)
+    }
+    this.setHeader('Content-Length', Buffer.byteLength(data))
+    this.end(data)
+  }
+
   write (data) {
     if (this.aborted) return
 
@@ -167,7 +187,7 @@ export class Response extends Writable {
       this.headersSent = true
       this.socket[kHead] = {
         headers: this[kHeaders],
-        status: this.status
+        status: this.statusCodeWithMessage
       }
     }
 
