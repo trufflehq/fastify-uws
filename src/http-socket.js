@@ -256,10 +256,17 @@ export class HTTPSocket extends EventEmitter {
     this[kReadyState].read = true
     const encoding = this[kEncoding]
     try {
-      this[kRes].onData((chunk, isLast) => {
+      this[kRes].onData((data, isLast) => {
         if (done) return
 
-        chunk = Buffer.from(chunk)
+        // create a copy of the buffer.
+        // if we just do `const chunk = Buffer.from(data)` it will be a reference to the original buffer
+        // which seems to get detached / mutated by uWebSockets.
+        // if we don't create a copy, large (>8kb) reqs will error with
+        // TypeError: Cannot perform %TypedArray%.prototype.set on a detached ArrayBuffer
+        // see https://github.com/socketio/socket.io/discussions/4281
+        let chunk = Buffer.alloc(data.byteLength)
+        Buffer.from(data).copy(chunk)
 
         this.bytesRead += Buffer.byteLength(chunk)
 
@@ -267,12 +274,8 @@ export class HTTPSocket extends EventEmitter {
           chunk = chunk.toString(encoding)
         }
 
-        // NOTE: for some reason uws will ocassionally send empty chunks at the start
-        // of a request, this is a workaround for that
-        if (this.bytesRead) {
-          this.emit('data', chunk)
-          cb(null, chunk)
-        }
+        this.emit('data', chunk)
+        cb(null, chunk)
 
         if (isLast) {
           done = true

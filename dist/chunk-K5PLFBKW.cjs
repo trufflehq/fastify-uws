@@ -237,18 +237,17 @@ var HTTPSocket = class extends _events2.default {
     this[kReadyState].read = true;
     const encoding = this[kEncoding];
     try {
-      this[kRes].onData((chunk, isLast) => {
+      this[kRes].onData((data, isLast) => {
         if (done)
           return;
-        chunk = Buffer.from(chunk);
+        let chunk = Buffer.alloc(data.byteLength);
+        Buffer.from(data).copy(chunk);
         this.bytesRead += Buffer.byteLength(chunk);
         if (encoding) {
           chunk = chunk.toString(encoding);
         }
-        if (this.bytesRead) {
-          this.emit("data", chunk);
-          cb(null, chunk);
-        }
+        this.emit("data", chunk);
+        cb(null, chunk);
         if (isLast) {
           done = true;
           cb(null, null);
